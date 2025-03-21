@@ -1,7 +1,7 @@
 .PHONY: build, run
 
 build:
-	@go build ./cmd/jsonflower/main.go
+	@go build -o ./jsonflower.exe ./cmd/jsonflower/main.go
 
 run: build
-	@./main
+	@./jsonflower.exe

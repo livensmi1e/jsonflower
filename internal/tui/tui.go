@@ -19,6 +19,7 @@ const (
 	SelectingMode state = iota
 	SelectingFile
 	DisplayingJSON
+	DisplayingYAML
 )
 
 const (
@@ -117,6 +118,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 		}
+	case tea.WindowSizeMsg:
+		// TODO: Fix to resize issue
 	}
 	var cmd tea.Cmd
 	switch m.state {
