@@ -21,7 +21,7 @@ func (l *Lexer) Emit(t TokenType) {
 }
 
 func (l *Lexer) Run() {
-	for state := LexValue; state != nil; {
+	for state := l.State; state != nil; {
 		state = state(l)
 	}
 }
@@ -95,4 +95,7 @@ func (l *Lexer) Dec() {
 	l.Position--
 }
 
-// TODO: Accept & AcceptRun
+// For testing lexer
+func (l *Lexer) NextToken() Token {
+	return <-l.Tokens
+}
