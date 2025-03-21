@@ -96,7 +96,31 @@ func LexNullLiteral(l *Lexer) LexFn {
 }
 
 func LexNumber(l *Lexer) LexFn {
+	l.Accept("-")
+	digit1_9 := "123456789"
+	digit0_9 := "012345678"
+	if l.Accept("0") {
 
+	} else if l.Accept(digit1_9) {
+		l.AcceptRun(digit0_9)
+	} else {
+		return l.Errorf("bad number syntax %q", l.Input[l.Start:l.Position])
+	}
+	if l.Accept(".") {
+		if !l.Accept(digit0_9) {
+			return l.Errorf("bad number syntax %q", l.Input[l.Start:l.Position])
+		}
+		l.AcceptRun(digit0_9)
+	}
+	if l.Accept("Ee") {
+		l.Accept("+-")
+		if !l.Accept(digit0_9) {
+			return l.Errorf("bad number syntax %q", l.Input[l.Start:l.Position])
+		}
+		l.AcceptRun(digit0_9)
+	}
+	l.Emit(TOKEN_NUMBER)
+	return LexValue
 }
 
 // TODO: Need to handle \uXXXX

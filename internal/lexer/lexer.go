@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -23,6 +24,20 @@ func (l *Lexer) Run() {
 	for state := LexValue; state != nil; {
 		state = state(l)
 	}
+}
+
+func (l *Lexer) Accept(valid string) bool {
+	if strings.ContainsRune(valid, l.Next()) {
+		return true
+	}
+	l.Backup()
+	return false
+}
+
+func (l *Lexer) AcceptRun(valid string) {
+	for strings.ContainsRune(valid, l.Next()) {
+	}
+	l.Backup()
 }
 
 func (l *Lexer) Ignore() {
