@@ -18,6 +18,7 @@ type Lexer struct {
 
 func (l *Lexer) Emit(t TokenType) {
 	l.Tokens <- Token{Type: t, Value: l.Input[l.Start:l.Position]}
+	l.Start = l.Position
 }
 
 func (l *Lexer) Run() {

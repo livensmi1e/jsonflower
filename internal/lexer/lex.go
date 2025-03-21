@@ -24,6 +24,10 @@ func LexValue(l *Lexer) LexFn {
 			return LexValueSeparator
 		case strings.HasPrefix(l.InputCurrentToEnd(), NAME_SEPARATOR):
 			return LexNameSeparator
+		case strings.HasPrefix(l.InputCurrentToEnd(), END_ARRAY):
+			return LexEndArray
+		case strings.HasPrefix(l.InputCurrentToEnd(), END_OBJECT):
+			return LexEndObject
 		}
 		switch r := l.Next(); {
 		case r == EOF:
