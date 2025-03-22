@@ -10,11 +10,11 @@ type Parser struct {
 
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{lex: l}
-	go p.lex.Run()
-	p.nextToken()
 	return p
 }
 func (p *Parser) Parse() Value {
+	go p.lex.Run()
+	p.nextToken()
 	return p.parseValue()
 }
 
