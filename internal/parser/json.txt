@@ -1,0 +1,24 @@
+grammar json;
+
+program: json EOF;
+
+json: value;
+
+value: object | array | NUMBER | STRING | TRUE | FALSE | NULL;
+
+object: '{' (member (VALUE_SEPARATOR member)*) '}' | '{' '}';
+
+member: STRING NAME_SEPARATOR value;
+
+array: '[' (value (VALUE_SEPARATOR value)*) ']' | '[' ']';
+
+STRING: 'D';
+
+NUMBER: 'N';
+
+TRUE: 'true';
+FALSE: 'false';
+NULL: 'null';
+VALUE_SEPARATOR: ',';
+NAME_SEPARATOR: ':';
+WS: [\n\r\f\t ];

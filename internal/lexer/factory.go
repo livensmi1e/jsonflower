@@ -1,6 +1,6 @@
 package lexer
 
-func BeginLexing(name, input string) *Lexer {
+func New(name, input string) *Lexer {
 	l := &Lexer{
 		Name:   name,
 		Input:  input,

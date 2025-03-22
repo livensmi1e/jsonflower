@@ -11,3 +11,9 @@ test-lex:
 
 vtest-lex:
 	@go test ./internal/lexer/ -v
+
+test-parse:
+	@go test ./internal/parser
+
+vtest-parse:
+	@go test ./internal/parser -v
