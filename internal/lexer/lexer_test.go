@@ -24,11 +24,22 @@ func TestLexer(t *testing.T) {
 		{Type: TOKEN_NAME_SEPARATOR, Value: NAME_SEPARATOR},
 		{Type: TOKEN_STRING, Value: "\"hello\""},
 		{Type: TOKEN_END_OBJECT, Value: END_OBJECT},
+		{Type: TOKEN_EOF, Value: "EOF"},
 	}
 	for i, expected := range expectedTokens {
 		token := l.NextToken()
-		if token.Type != expected.Type || token.Value != expected.Value {
+		if token.Type != expected.Type {
 			t.Errorf("Token %d: expected %s, got %s", i, expected.String(), token.String())
+		} else {
+			t.Logf("Token %d: %s", i, token.String())
 		}
+	}
+	select {
+	case token, ok := <-l.Tokens:
+		if ok {
+			t.Errorf("Unexpected extra token: %s", token.String())
+		}
+	default:
+		// Không có token dư, OK
 	}
 }

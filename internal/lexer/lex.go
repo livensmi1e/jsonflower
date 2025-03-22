@@ -31,7 +31,8 @@ func LexValue(l *Lexer) LexFn {
 		}
 		switch r := l.Next(); {
 		case r == EOF:
-			return l.Errorf("unexpected end of file")
+			l.Emit(TOKEN_EOF)
+			return nil
 		case unicode.IsSpace(r):
 			l.Ignore()
 		case r == '-' || ('0' <= r && r <= '9'):

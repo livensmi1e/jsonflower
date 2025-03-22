@@ -22,6 +22,7 @@ func (l *Lexer) Emit(t TokenType) {
 }
 
 func (l *Lexer) Run() {
+	defer close(l.Tokens)
 	for state := l.State; state != nil; {
 		state = state(l)
 	}

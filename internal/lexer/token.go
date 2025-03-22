@@ -51,5 +51,5 @@ func (t Token) String() string {
 	if len(t.Value) > 10 {
 		return fmt.Sprintf("%.10q...", t.Value)
 	}
-	return fmt.Sprintf("%q", t.Value)
+	return fmt.Sprintf("Type: %d - Value: %q", t.Type, t.Value)
 }
