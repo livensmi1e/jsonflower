@@ -35,6 +35,17 @@ func TestParser(t *testing.T) {
 			"\"a\"": Number{Value: 1}, "\"b\"": Number{Value: 2.5},
 		}}},
 
+		{"Nested JSON", `{"numbers": [1, 2, 3.5], "nested": {"valid": false, "empty": [], "null": null}}`, &Object{KeyValue: map[string]Value{
+			"\"numbers\"": &Array{Elements: []Value{
+				Number{Value: 1}, Number{Value: 2}, Number{Value: 3.5},
+			}},
+			"\"nested\"": &Object{KeyValue: map[string]Value{
+				"\"valid\"": Boolean{Value: false},
+				"\"empty\"": &Array{Elements: []Value{}},
+				"\"null\"":  Null{},
+			}},
+		}}},
+
 		{"Invalid JSON", `{invalid}`, nil},
 		{"Missing Comma", `{"a": 1 "b": 2}`, nil},
 		{"Unclosed Array", `[1, 2, 3`, nil},
@@ -47,6 +58,7 @@ func TestParser(t *testing.T) {
 			parsed := p.Parse()
 			if !equalValues(parsed, tc.expected) {
 				t.Errorf("expected %+v, got %+v", tc.expected, parsed)
+				t.Errorf("%+v", p.error)
 			}
 		})
 	}

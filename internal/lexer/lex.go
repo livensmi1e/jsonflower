@@ -7,27 +7,27 @@ import (
 
 type lexFn func(*Lexer) lexFn
 
-func LexValue(l *Lexer) lexFn {
+func lexValue(l *Lexer) lexFn {
 	for {
 		switch {
 		case strings.HasPrefix(l.posToEndInput(), BEGIN_ARRAY):
-			return LexBeginArray
+			return lexBeginArray
 		case strings.HasPrefix(l.posToEndInput(), BEGIN_OBJECT):
-			return LexBeginObject
+			return lexBeginObject
 		case strings.HasPrefix(l.posToEndInput(), TRUE_LITERAL):
-			return LexTrueLiteral
+			return lexTrueLiteral
 		case strings.HasPrefix(l.posToEndInput(), FALSE_LITERAL):
-			return LexFalseLiteral
+			return lexFalseLiteral
 		case strings.HasPrefix(l.posToEndInput(), NULL_LITERAL):
-			return LexNullLiteral
+			return lexNullLiteral
 		case strings.HasPrefix(l.posToEndInput(), VALUE_SEPARATOR):
-			return LexValueSeparator
+			return lexValueSeparator
 		case strings.HasPrefix(l.posToEndInput(), NAME_SEPARATOR):
-			return LexNameSeparator
+			return lexNameSeparator
 		case strings.HasPrefix(l.posToEndInput(), END_ARRAY):
-			return LexEndArray
+			return lexEndArray
 		case strings.HasPrefix(l.posToEndInput(), END_OBJECT):
-			return LexEndObject
+			return lexEndObject
 		}
 		switch r := l.next(); {
 		case r == EOF:
@@ -37,70 +37,70 @@ func LexValue(l *Lexer) lexFn {
 			l.ignore()
 		case r == '-' || ('0' <= r && r <= '9'):
 			l.backup()
-			return LexNumber
+			return lexNumber
 		case r == '"':
-			return LexString
+			return lexString
 		default:
-			return l.Errorf("unexpected character: %q", r)
+			return l.errorf("unexpected character: %q", r)
 		}
 	}
 }
 
-func LexBeginArray(l *Lexer) lexFn {
+func lexBeginArray(l *Lexer) lexFn {
 	l.pos += len(BEGIN_ARRAY)
 	l.emit(TOKEN_BEGIN_ARRAY)
-	return LexValue
+	return lexValue
 }
 
-func LexEndArray(l *Lexer) lexFn {
+func lexEndArray(l *Lexer) lexFn {
 	l.pos += len(END_ARRAY)
 	l.emit(TOKEN_END_ARRAY)
-	return LexValue
+	return lexValue
 }
 
-func LexValueSeparator(l *Lexer) lexFn {
+func lexValueSeparator(l *Lexer) lexFn {
 	l.pos += len(VALUE_SEPARATOR)
 	l.emit(TOKEN_VALUE_SEPARATOR)
-	return LexValue
+	return lexValue
 }
 
-func LexBeginObject(l *Lexer) lexFn {
+func lexBeginObject(l *Lexer) lexFn {
 	l.pos += len(BEGIN_OBJECT)
 	l.emit(TOKEN_BEGIN_OBJECT)
-	return LexValue
+	return lexValue
 }
 
-func LexEndObject(l *Lexer) lexFn {
+func lexEndObject(l *Lexer) lexFn {
 	l.pos += len(END_OBJECT)
 	l.emit(TOKEN_END_OBJECT)
-	return LexValue
+	return lexValue
 }
 
-func LexNameSeparator(l *Lexer) lexFn {
+func lexNameSeparator(l *Lexer) lexFn {
 	l.pos += len(NAME_SEPARATOR)
 	l.emit(TOKEN_NAME_SEPARATOR)
-	return LexValue
+	return lexValue
 }
 
-func LexTrueLiteral(l *Lexer) lexFn {
+func lexTrueLiteral(l *Lexer) lexFn {
 	l.pos += len(TRUE_LITERAL)
 	l.emit(TOKEN_TRUE_LITERAL)
-	return LexValue
+	return lexValue
 }
 
-func LexFalseLiteral(l *Lexer) lexFn {
+func lexFalseLiteral(l *Lexer) lexFn {
 	l.pos += len(FALSE_LITERAL)
 	l.emit(TOKEN_FALSE_LITERAL)
-	return LexValue
+	return lexValue
 }
 
-func LexNullLiteral(l *Lexer) lexFn {
+func lexNullLiteral(l *Lexer) lexFn {
 	l.pos += len(NULL_LITERAL)
 	l.emit(TOKEN_NULL_LITERAL)
-	return LexValue
+	return lexValue
 }
 
-func LexNumber(l *Lexer) lexFn {
+func lexNumber(l *Lexer) lexFn {
 	l.accept("-")
 	digit1_9 := "123456789"
 	digit0_9 := "012345678"
@@ -109,39 +109,39 @@ func LexNumber(l *Lexer) lexFn {
 	} else if l.accept(digit1_9) {
 		l.acceptRun(digit0_9)
 	} else {
-		return l.Errorf("bad number syntax %q", l.input[l.start:l.pos])
+		return l.errorf("bad number syntax %q", l.input[l.start:l.pos])
 	}
 	if l.accept(".") {
 		if !l.accept(digit0_9) {
-			return l.Errorf("bad number syntax %q", l.input[l.start:l.pos])
+			return l.errorf("bad number syntax %q", l.input[l.start:l.pos])
 		}
 		l.acceptRun(digit0_9)
 	}
 	if l.accept("Ee") {
 		l.accept("+-")
 		if !l.accept(digit0_9) {
-			return l.Errorf("bad number syntax %q", l.input[l.start:l.pos])
+			return l.errorf("bad number syntax %q", l.input[l.start:l.pos])
 		}
 		l.acceptRun(digit0_9)
 	}
 	l.emit(TOKEN_NUMBER)
-	return LexValue
+	return lexValue
 }
 
 // TODO: Need to handle \uXXXX
-func LexString(l *Lexer) lexFn {
+func lexString(l *Lexer) lexFn {
 	for {
 		switch l.next() {
 		case '"':
 			l.emit(TOKEN_STRING)
-			return LexValue
+			return lexValue
 		case '\\':
 			if r := l.next(); r == '/' || r == 'b' || r == 'f' || r == 'n' || r == 'r' || r == 't' {
 				break
 			}
 			fallthrough
 		case EOF, '\n':
-			return l.Errorf("unterminated string")
+			return l.errorf("unterminated string")
 		}
 	}
 }
