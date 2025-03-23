@@ -37,8 +37,8 @@ const (
 )
 
 type Token struct {
-	Type  TokenType
-	Value string
+	Type   TokenType
+	Lexeme string
 }
 
 func (t Token) String() string {
@@ -46,10 +46,10 @@ func (t Token) String() string {
 	case TOKEN_EOF:
 		return "EOF"
 	case TOKEN_ERROR:
-		return t.Value
+		return t.Lexeme
 	}
-	if len(t.Value) > 10 {
-		return fmt.Sprintf("%.10q...", t.Value)
+	if len(t.Lexeme) > 10 {
+		return fmt.Sprintf("%.10q...", t.Lexeme)
 	}
-	return fmt.Sprintf("Type: %d - Value: %q", t.Type, t.Value)
+	return fmt.Sprintf("Type: %d - Lexeme: %q", t.Type, t.Lexeme)
 }

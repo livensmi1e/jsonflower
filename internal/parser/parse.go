@@ -19,16 +19,16 @@ func (p *Parser) parseValue() Value {
 		p.nextToken()
 		return p.parseArray()
 	case lexer.TOKEN_STRING:
-		s := String{Literal: p.curToken.Value}
+		s := String{Literal: p.curToken.Lexeme}
 		p.nextToken()
 		return s
 	case lexer.TOKEN_NUMBER:
-		v, _ := strconv.ParseFloat(p.curToken.Value, 64)
+		v, _ := strconv.ParseFloat(p.curToken.Lexeme, 64)
 		n := Number{Value: v}
 		p.nextToken()
 		return n
 	case lexer.TOKEN_TRUE_LITERAL, lexer.TOKEN_FALSE_LITERAL:
-		v, _ := strconv.ParseBool(p.curToken.Value)
+		v, _ := strconv.ParseBool(p.curToken.Lexeme)
 		b := Boolean{Value: v}
 		p.nextToken()
 		return b
@@ -77,7 +77,7 @@ func (p *Parser) parseMember() (string, Value) {
 		p.error = fmt.Errorf("expected string key, got %s", p.curToken.String())
 		return "", nil
 	}
-	key := p.curToken.Value
+	key := p.curToken.Lexeme
 	p.nextToken()
 	if p.curToken.Type != lexer.TOKEN_NAME_SEPARATOR {
 		p.error = fmt.Errorf("expected ':', got %s", p.curToken.String())

@@ -27,7 +27,7 @@ func (l *Lexer) NextToken() Token {
 }
 
 func (l *Lexer) emit(t TokenType) {
-	l.tokens <- Token{Type: t, Value: l.input[l.start:l.pos]}
+	l.tokens <- Token{Type: t, Lexeme: l.input[l.start:l.pos]}
 	l.start = l.pos
 }
 
