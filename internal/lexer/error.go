@@ -9,8 +9,8 @@ const (
 	// TODO: Define more errors if any
 )
 
-func (l *Lexer) Errorf(format string, args ...any) LexFn {
-	l.Tokens <- Token{
+func (l *Lexer) Errorf(format string, args ...any) lexFn {
+	l.tokens <- Token{
 		TOKEN_ERROR,
 		fmt.Sprintf(format, args...),
 	}

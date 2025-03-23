@@ -2,102 +2,72 @@ package lexer
 
 import (
 	"strings"
-	"unicode"
 	"unicode/utf8"
 )
 
 type Lexer struct {
-	Name     string
-	Input    string
-	State    LexFn
-	Start    int
-	Position int
-	Width    int
-	Tokens   chan Token
-}
-
-func (l *Lexer) Emit(t TokenType) {
-	l.Tokens <- Token{Type: t, Value: l.Input[l.Start:l.Position]}
-	l.Start = l.Position
+	name        string
+	input       string
+	initalState lexFn
+	start       int
+	pos         int
+	width       int
+	tokens      chan Token
 }
 
 func (l *Lexer) Run() {
-	defer close(l.Tokens)
-	for state := l.State; state != nil; {
+	defer close(l.tokens)
+	for state := l.initalState; state != nil; {
 		state = state(l)
 	}
 }
 
-func (l *Lexer) Accept(valid string) bool {
-	if strings.ContainsRune(valid, l.Next()) {
+func (l *Lexer) NextToken() Token {
+	return <-l.tokens
+}
+
+func (l *Lexer) emit(t TokenType) {
+	l.tokens <- Token{Type: t, Value: l.input[l.start:l.pos]}
+	l.start = l.pos
+}
+
+func (l *Lexer) accept(valid string) bool {
+	if strings.ContainsRune(valid, l.next()) {
 		return true
 	}
-	l.Backup()
+	l.backup()
 	return false
 }
 
-func (l *Lexer) AcceptRun(valid string) {
-	for strings.ContainsRune(valid, l.Next()) {
+func (l *Lexer) acceptRun(valid string) {
+	for strings.ContainsRune(valid, l.next()) {
 	}
-	l.Backup()
+	l.backup()
 }
 
-func (l *Lexer) Ignore() {
-	l.Start = l.Position
+func (l *Lexer) ignore() {
+	l.start = l.pos
 }
 
-func (l *Lexer) Backup() {
-	l.Position -= l.Width
+func (l *Lexer) backup() {
+	l.pos -= l.width
 }
 
-func (l *Lexer) Peek() rune {
-	rune := l.Next()
-	l.Backup()
-	return rune
-}
-
-func (l *Lexer) Next() rune {
-	if l.IsEOF() {
-		l.Width = 0
+func (l *Lexer) next() rune {
+	if l.isEOF() {
+		l.width = 0
 		return EOF
 	}
-	result, Width := utf8.DecodeRuneInString(l.InputCurrentToEnd())
-	l.Width = Width
-	l.Position += Width
+	result, width := utf8.DecodeRuneInString(l.posToEndInput())
+	l.width = width
+	l.pos += width
 	return result
 }
 
-func (l *Lexer) InputCurrentToEnd() string {
-	return l.Input[l.Position:]
+func (l *Lexer) posToEndInput() string {
+	return l.input[l.pos:]
 }
 
-func (l *Lexer) IsEOF() bool {
-	return l.Position >= len(l.Input)
-}
-
-func (l *Lexer) SkipWhiteSpace() {
-	for {
-		r := l.Next()
-		if !unicode.IsSpace(r) {
-			l.Dec()
-			break
-		}
-		if r == EOF {
-			l.Emit(TOKEN_EOF)
-			break
-		}
-	}
-}
-
-func (l *Lexer) Inc() {
-	l.Position++
-}
-
-func (l *Lexer) Dec() {
-	l.Position--
-}
-
-// For testing lexer
-func (l *Lexer) NextToken() Token {
-	return <-l.Tokens
+func (l *Lexer) isEOF() bool {
+	return l.pos >= len(l.input)
 }

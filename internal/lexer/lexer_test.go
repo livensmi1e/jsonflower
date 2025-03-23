@@ -146,7 +146,7 @@ func TestLexer(t *testing.T) {
 				}
 			}
 			select {
-			case token, ok := <-l.Tokens:
+			case token, ok := <-l.tokens:
 				if ok {
 					t.Errorf("Unexpected extra token: %s", token.String())
 				}
