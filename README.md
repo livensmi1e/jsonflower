@@ -1,6 +1,6 @@
 ## JSONFlower
 
-JSONFlower is a project for learning how to implement a lexer, parser, and CLI tools using Bubble Tea.
+JSONFlower - Beautify JSON Input is a project for learning how to implement a lexer, parser, and CLI tool (of course) with the help of GPT.
 
 Resources:
 
