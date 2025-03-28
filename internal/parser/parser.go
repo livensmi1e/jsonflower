@@ -18,6 +18,14 @@ func (p *Parser) Parse() Value {
 	return p.parseValue()
 }
 
+func (p *Parser) Err() string {
+	if p.hasError() {
+		return p.error.Error()
+	} else {
+		return ""
+	}
+}
+
 func (p *Parser) nextToken() {
 	p.curToken = p.lex.NextToken()
 }

@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 
 	"github.com/charmbracelet/bubbles/filepicker"
@@ -129,6 +130,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.filePicker, cmd = m.filePicker.Update(msg)
 		if didSelect, path := m.filePicker.DidSelectFile(msg); didSelect {
 			m.selectedFile = path
+			content, err := os.ReadFile(path)
+			if err != nil {
+				m.result = "❌ Error reading file"
+			} else {
+				m.result = beautifyJSON(string(content))
+			}
 			m.state = DisplayingJSON
 		}
 	}
@@ -145,7 +152,7 @@ func (m model) View() string {
 	case SelectingFile:
 		return renderBox("  Pick your JSON file: \n\n" + m.filePicker.View())
 	case DisplayingJSON:
-		return renderBox("🌟 JSON Beautifier 🌟\n" + m.result)
+		return renderBox(m.result)
 	}
 	return ""
 }
