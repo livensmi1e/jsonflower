@@ -133,10 +133,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			content, err := os.ReadFile(path)
 			if err != nil {
 				m.result = "❌ Error reading file"
-			} else {
-				m.result = beautifyJSON(string(content))
 			}
-			m.state = DisplayingJSON
+			switch m.mode {
+			case ModeBeautify:
+				m.result = beautifyJSON(string(content))
+				m.state = DisplayingJSON
+			case ModeJSONToYAML:
+				m.result = convertJSON2YAML(string(content))
+				m.state = DisplayingYAML
+			}
 		}
 	}
 	return m, cmd
@@ -151,7 +156,7 @@ func (m model) View() string {
 		return renderBox(m.list.View())
 	case SelectingFile:
 		return renderBox("  Pick your JSON file: \n\n" + m.filePicker.View())
-	case DisplayingJSON:
+	case DisplayingJSON, DisplayingYAML:
 		return renderBox(m.result)
 	}
 	return ""
