@@ -13,22 +13,11 @@ func TransformJSON2YAML(value parser.Value) string {
 
 func transformYAML(value parser.Value, indent int) string {
 	var sb strings.Builder
-	indentStr := strings.Repeat("  ", indent)
 	switch v := value.(type) {
 	case *parser.Object:
 		sb.WriteString(transformObject(v, indent))
 	case *parser.Array:
-		for _, value := range v.Elements {
-			sb.WriteString(indentStr + "- ")
-			if obj, ok := value.(*parser.Object); ok {
-				sb.WriteString(transformObjectInArray(obj, indent+1))
-			} else {
-				sb.WriteString(transformYAML(value, indent+1) + "\n")
-			}
-		}
-		if sb.String() == "" {
-			sb.WriteString("[]")
-		}
+		sb.WriteString(transformArray(v, indent))
 	case parser.String:
 		sb.WriteString(toRawString(v.Literal))
 	case parser.Number:
@@ -87,12 +76,10 @@ func transformObjectInArray(obj *parser.Object, indent int) string {
 			}
 		}
 	}
-	str := sb.String()
-	if str == "" {
-		return "{}"
-	} else {
-		return str
+	if sb.String() == "" {
+		sb.WriteString("{}")
 	}
+	return sb.String()
 }
 
 func transformObject(obj *parser.Object, indent int) string {
@@ -105,10 +92,25 @@ func transformObject(obj *parser.Object, indent int) string {
 			sb.WriteString(transformYAML(value, indent+1) + "\n")
 		}
 	}
-	str := sb.String()
-	if str == "" {
-		return "{}"
-	} else {
-		return str
+	if sb.String() == "" {
+		sb.WriteString("{}")
 	}
+	return sb.String()
+}
+
+func transformArray(arr *parser.Array, indent int) string {
+	var sb strings.Builder
+	indentStr := strings.Repeat("  ", indent)
+	for _, value := range arr.Elements {
+		sb.WriteString(indentStr + "- ")
+		if obj, ok := value.(*parser.Object); ok {
+			sb.WriteString(transformObjectInArray(obj, indent+1))
+		} else {
+			sb.WriteString(transformYAML(value, indent+1) + "\n")
+		}
+	}
+	if sb.String() == "" {
+		sb.WriteString("[]")
+	}
+	return sb.String()
 }
