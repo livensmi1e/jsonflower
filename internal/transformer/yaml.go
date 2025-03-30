@@ -8,7 +8,7 @@ import (
 )
 
 func TransformJSON2YAML(value parser.Value) string {
-	return transformYAML(value, 0)
+	return strings.TrimSuffix(transformYAML(value, 0), "\n")
 }
 
 func transformYAML(value parser.Value, indent int) string {
@@ -16,18 +16,18 @@ func transformYAML(value parser.Value, indent int) string {
 	indentStr := strings.Repeat("  ", indent)
 	switch v := value.(type) {
 	case *parser.Object:
-		for key, value := range v.KeyValue {
-			sb.WriteString(indentStr + toRawString(key) + ": ")
-			if isComplex(value) {
-				sb.WriteString("\n" + transformYAML(value, indent+1))
+		sb.WriteString(transformObject(v, indent))
+	case *parser.Array:
+		for _, value := range v.Elements {
+			sb.WriteString(indentStr + "- ")
+			if obj, ok := value.(*parser.Object); ok {
+				sb.WriteString(transformObjectInArray(obj, indent+1))
 			} else {
 				sb.WriteString(transformYAML(value, indent+1) + "\n")
 			}
 		}
-	case *parser.Array:
-		for _, value := range v.Elements {
-
-			sb.WriteString(indentStr + "- " + transformYAML(value, indent+1) + "\n")
+		if sb.String() == "" {
+			sb.WriteString("[]")
 		}
 	case parser.String:
 		sb.WriteString(toRawString(v.Literal))
@@ -53,9 +53,11 @@ func formatBool(b bool) string {
 }
 
 func isComplex(value parser.Value) bool {
-	switch value.(type) {
-	case *parser.Object, *parser.Array:
-		return true
+	switch v := value.(type) {
+	case *parser.Object:
+		return len(v.KeyValue) != 0
+	case *parser.Array:
+		return len(v.Elements) != 0
 	default:
 		return false
 	}
@@ -63,4 +65,50 @@ func isComplex(value parser.Value) bool {
 
 func toRawString(quoted string) string {
 	return strings.TrimPrefix(strings.TrimSuffix(quoted, "\""), "\"")
+}
+
+func transformObjectInArray(obj *parser.Object, indent int) string {
+	var sb strings.Builder
+	first := true
+	for key, val := range obj.KeyValue {
+		if first {
+			if isComplex(val) {
+				sb.WriteString("\n" + toRawString(key) + ": " + transformYAML(val, indent+1))
+			} else {
+				sb.WriteString(toRawString(key) + ": " + transformYAML(val, indent+1) + "\n")
+			}
+			first = false
+		} else {
+			sb.WriteString(strings.Repeat("  ", indent) + toRawString(key) + ": ")
+			if isComplex(val) {
+				sb.WriteString("\n" + transformYAML(val, indent+1))
+			} else {
+				sb.WriteString(transformYAML(val, indent+1) + "\n")
+			}
+		}
+	}
+	str := sb.String()
+	if str == "" {
+		return "{}"
+	} else {
+		return str
+	}
+}
+
+func transformObject(obj *parser.Object, indent int) string {
+	var sb strings.Builder
+	for key, value := range obj.KeyValue {
+		sb.WriteString(strings.Repeat("  ", indent) + toRawString(key) + ": ")
+		if isComplex(value) {
+			sb.WriteString("\n" + transformYAML(value, indent+1))
+		} else {
+			sb.WriteString(transformYAML(value, indent+1) + "\n")
+		}
+	}
+	str := sb.String()
+	if str == "" {
+		return "{}"
+	} else {
+		return str
+	}
 }

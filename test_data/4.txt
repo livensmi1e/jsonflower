@@ -1,0 +1,25 @@
+{
+  "key": {
+    "value": "test",
+    "number": 1,
+    "nested": {
+      "bool": true,
+      "null_value": null,
+      "array_in_object": [1, "item", false, {"deep": "value"}]
+    }
+  },
+  "array": [
+    1,
+    "item",
+    true,
+    {
+      "sub": "value",
+      "second": "value",
+      "nested_array": [2, "another", {"inside": "array"}]
+    }
+  ],
+  "empty_object": {},
+  "empty_array": [],
+  "numbers": [42, 3.14, -7],
+  "booleans": [true, false]
+}
